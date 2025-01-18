@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -16,11 +16,39 @@ type Task = {
 };
 type Board = (Task | null)[];
 
+const STORAGE_KEY = "taskTacToeBoard";
+
 const TaskBoard = () => {
-  const [board, setBoard] = useState<Board>(Array(9).fill(null));
+  const [board, setBoard] = useState<Board>(() => {
+    const savedBoard = localStorage.getItem(STORAGE_KEY);
+    return savedBoard ? JSON.parse(savedBoard) : Array(9).fill(null);
+  });
+  
   const { toast } = useToast();
   const [newTask, setNewTask] = useState({ title: "", dueDate: "" });
   const [selectedCell, setSelectedCell] = useState<number | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
+    
+    // Check for overdue tasks
+    const now = new Date();
+    const updatedBoard = board.map((task) => {
+      if (task && task.dueDate && new Date(task.dueDate) < now && task.status === "PENDING") {
+        return { ...task, status: "OVERDUE" };
+      }
+      return task;
+    });
+    
+    if (JSON.stringify(updatedBoard) !== JSON.stringify(board)) {
+      setBoard(updatedBoard);
+      toast({
+        title: "Tasks Updated",
+        description: "Some tasks are now overdue!",
+        variant: "destructive",
+      });
+    }
+  }, [board]);
 
   const getStatusIcon = (status: TaskStatus) => {
     switch (status) {
@@ -69,7 +97,39 @@ const TaskBoard = () => {
         title: "Task Completed! 🎉",
         description: "Keep up the great work!",
       });
+      
+      // Check for winning condition
+      checkWinningCondition(newBoard);
     }
+  };
+
+  const checkWinningCondition = (currentBoard: Board) => {
+    const winningLines = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+      [0, 4, 8], [2, 4, 6] // Diagonals
+    ];
+
+    for (const line of winningLines) {
+      const [a, b, c] = line;
+      if (
+        currentBoard[a]?.status === "COMPLETED" &&
+        currentBoard[b]?.status === "COMPLETED" &&
+        currentBoard[c]?.status === "COMPLETED"
+      ) {
+        toast({
+          title: "Congratulations! 🎉",
+          description: "You've completed a full line of tasks!",
+        });
+        return;
+      }
+    }
+  };
+
+  const resetBoard = () => {
+    setBoard(Array(9).fill(null));
+    setNewTask({ title: "", dueDate: "" });
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const renderCell = (index: number) => {
@@ -81,12 +141,12 @@ const TaskBoard = () => {
             variant="outline"
             className={`h-28 w-full p-2 flex flex-col items-center justify-center gap-2 ${
               task?.status === "COMPLETED"
-                ? "bg-green-50"
+                ? "bg-green-50 dark:bg-green-900/20"
                 : task?.status === "OVERDUE"
-                ? "bg-red-50"
+                ? "bg-red-50 dark:bg-red-900/20"
                 : task?.status === "PENDING"
-                ? "bg-yellow-50"
-                : "hover:bg-gray-50"
+                ? "bg-yellow-50 dark:bg-yellow-900/20"
+                : "hover:bg-gray-50 dark:hover:bg-gray-800"
             }`}
             onClick={() => task && toggleTaskStatus(index)}
           >
