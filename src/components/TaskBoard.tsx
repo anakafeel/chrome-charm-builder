@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -18,7 +18,7 @@ type Board = (Task | null)[];
 
 const STORAGE_KEY = "taskTacToeBoard";
 
-const TaskBoard = () => {
+const TaskBoard = forwardRef<{ resetBoard: () => void }>((_, ref) => {
   const [board, setBoard] = useState<Board>(() => {
     const savedBoard = localStorage.getItem(STORAGE_KEY);
     return savedBoard ? JSON.parse(savedBoard) : Array(9).fill(null);
@@ -26,7 +26,13 @@ const TaskBoard = () => {
   
   const { toast } = useToast();
   const [newTask, setNewTask] = useState({ title: "", dueDate: "" });
-  const [selectedCell, setSelectedCell] = useState<number | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    resetBoard: () => {
+      setBoard(Array(9).fill(null));
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }));
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
@@ -35,7 +41,7 @@ const TaskBoard = () => {
     const now = new Date();
     const updatedBoard = board.map((task) => {
       if (task && task.dueDate && new Date(task.dueDate) < now && task.status === "PENDING") {
-        return { ...task, status: "OVERDUE" };
+        return { ...task, status: "OVERDUE" as TaskStatus };
       }
       return task;
     });
@@ -211,6 +217,8 @@ const TaskBoard = () => {
       </div>
     </Card>
   );
-};
+});
+
+TaskBoard.displayName = "TaskBoard";
 
 export default TaskBoard;

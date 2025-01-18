@@ -3,7 +3,7 @@ import TaskBoard from "@/components/TaskBoard";
 import { useRef } from "react";
 
 const Index = () => {
-  const taskBoardRef = useRef<{ resetBoard: () => void } | null>(null);
+  const taskBoardRef = useRef<{ resetBoard: () => void }>(null);
 
   const handleReset = () => {
     if (taskBoardRef.current) {
