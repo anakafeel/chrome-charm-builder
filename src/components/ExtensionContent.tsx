@@ -1,5 +1,6 @@
-import { Button } from "./ui/button";
-import { Card } from "./ui/card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const ExtensionContent = () => {
   return (
@@ -9,6 +10,7 @@ const ExtensionContent = () => {
         <p className="text-sm text-extension-text-secondary mb-4">
           This is your new Chrome extension. Start customizing it to make it your own!
         </p>
+        <Separator className="my-4" />
         <Button 
           className="w-full bg-extension-primary hover:bg-extension-secondary text-white"
           onClick={() => console.log("Button clicked!")}
