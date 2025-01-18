@@ -1,12 +1,15 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import ExtensionHeader from "@/components/ExtensionHeader";
+import ExtensionContent from "@/components/ExtensionContent";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="w-[350px] min-h-[400px] bg-extension-background">
+      <Card className="rounded-none min-h-[400px] border-0">
+        <ExtensionHeader />
+        <ExtensionContent />
+      </Card>
     </div>
   );
 };
